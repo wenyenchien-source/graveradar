@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="尋墓雷達">
+<meta name="theme-color" content="#f6efe2">
+<title>尋墓雷達｜重生禮儀</title>
+<style>
+:root{
+  --paper:#f6efe2; --card:#fffaf0; --ink:#3b2a1d; --muted:#6d5a48; --line:#dccfb8;
+  --clay:#b34a29; --clay-d:#8f3a1f; --gold:#8f6526;
+  --bezel:#33261b; --lcd:#cfe6c4; --lcd-grid:#7fa678; --lcd-ink:#24452b;
+  --font:"PingFang TC","Noto Sans TC","Microsoft JhengHei","Heiti TC",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.6 var(--font);
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+main{max-width:520px;margin:0 auto;padding:12px 16px 48px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+.top{display:flex;align-items:center;gap:12px;min-height:56px}
+h1{font-size:26px;line-height:1.2;margin:0;letter-spacing:.14em}
+.back{min-height:48px;min-width:48px;padding:0 14px;border:0;background:transparent;color:var(--clay-d);
+  font:inherit;font-weight:600;cursor:pointer}
+.sub{margin:0 0 8px;color:var(--muted);font-size:15px}
+h2{font-size:20px;margin:0 0 4px}
+h3{font-size:18px;margin:0}
+.section{margin-top:28px}
+.muted{color:var(--muted);font-size:15px}
+
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;padding:10px 16px;
+  font:inherit;font-weight:600;border-radius:12px;border:1.5px solid var(--clay);
+  background:transparent;color:var(--clay-d);text-decoration:none;cursor:pointer}
+.btn.primary{background:var(--clay);color:#fff}
+.btn.primary:active{background:var(--clay-d)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.plain{border-color:var(--line);color:var(--ink)}
+.btn.danger{border-color:transparent;color:#9a2b1a;min-height:48px}
+.row{display:flex;gap:10px;margin-top:10px}
+.row>*{flex:1}
+
+label{display:block;font-weight:600;margin:18px 0 6px}
+input[type=text],textarea,select{width:100%;min-height:52px;padding:12px 14px;font:inherit;color:var(--ink);
+  background:#fff;border:1.5px solid var(--line);border-radius:10px}
+textarea{min-height:96px;resize:vertical}
+
+.grave{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
+.grave p{margin:2px 0}
+.grave .btn{margin-top:12px}
+.empty{margin:20px 0;padding:18px;border:1.5px dashed var(--line);border-radius:12px;color:var(--muted)}
+.grp-head{margin:24px 0 0;padding-bottom:6px;border-bottom:1.5px solid var(--line);
+  font-size:15px;font-weight:700;color:var(--gold);letter-spacing:.04em}
+.grp-head:first-child{margin-top:16px}
+
+.fixbox{margin-top:8px;padding:14px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.fixbox p{margin:0 0 10px}
+.fixbox .ok{color:var(--lcd-ink);font-weight:600}
+.fixbox .bad{color:#9a2b1a;font-weight:600}
+
+.hint{margin:6px 0 0;font-size:14px;color:var(--muted)}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.thumb{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#e8dcc6}
+.thumb img,.thumb video{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .tag{position:absolute;left:5px;bottom:5px;background:rgba(51,38,27,.78);color:#fff;
+  font-size:11px;padding:2px 6px;border-radius:6px}
+.thumb button{position:absolute;top:4px;right:4px;width:36px;height:36px;border-radius:50%;border:0;
+  background:rgba(51,38,27,.78);color:#fff;font-size:20px;line-height:1;cursor:pointer}
+.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block;cursor:zoom-in}
+.photos video{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block;background:#000}
+
+/* radar */
+.radar{display:block;width:min(100%,340px);height:auto;margin:14px auto 0}
+.bezel{fill:var(--bezel)}
+.bezel-ring{fill:none;stroke:#5a4636;stroke-width:2}
+.lcd{fill:var(--lcd)}
+.grid{fill:none;stroke:var(--lcd-grid);stroke-width:.8}
+.accz{fill:rgba(36,69,43,.10);stroke:var(--lcd-ink);stroke-width:.8;stroke-dasharray:3 3}
+.dot{fill:var(--clay)}
+.pulse{fill:var(--clay);transform-box:fill-box;transform-origin:center;animation:ping 1.8s ease-out infinite}
+.me{fill:var(--lcd-ink)}
+.star{fill:var(--gold)}
+.starGlow{fill:rgba(143,101,38,.22);transform-box:fill-box;transform-origin:center;animation:starpulse 1.2s ease-in-out infinite}
+@keyframes starpulse{0%,100%{transform:scale(.85);opacity:.6}50%{transform:scale(1.25);opacity:1}}
+@media (prefers-reduced-motion:reduce){.starGlow{animation:none;opacity:.5}}
+.nm circle{fill:var(--lcd-ink)}
+.nm text{fill:var(--lcd);font-size:9px;font-weight:700;text-anchor:middle;font-family:var(--font)}
+@keyframes ping{0%{transform:scale(.7);opacity:.75}100%{transform:scale(2.4);opacity:0}}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none;opacity:.35}}
+
+.readout{text-align:center;margin-top:12px}
+.dist{font-size:44px;line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums}
+.where{font-size:20px;font-weight:600;margin-top:2px}
+.state{margin:6px 0 0;color:var(--muted);font-size:15px;min-height:1.6em}
+.state.arrive{color:var(--lcd-ink);font-weight:700;font-size:17px}
+.state.warn{color:#9a2b1a}
+.caption{margin:2px 0 0;color:var(--muted);font-size:14px;text-align:center}
+
+dl{margin:10px 0 0}
+dt{font-size:14px;color:var(--muted);margin-top:10px}
+dd{margin:0}
+.coord{font-variant-numeric:tabular-nums}
+
+#lightbox{position:fixed;inset:0;background:rgba(30,22,15,.92);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+#lightbox img,#lightbox video{max-width:100%;max-height:100%;border-radius:8px}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);
+  background:var(--bezel);color:#fff;padding:12px 18px;border-radius:12px;font-size:16px;z-index:30;max-width:90%;text-align:center}
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <button id="back" class="back" hidden aria-label="返回墓位清單">‹ 返回</button>
+    <h1>尋墓雷達</h1>
+  </header>
+
+  <!-- 清單 -->
+  <section id="v-home" class="view">
+    <p class="sub">陪家屬到墓前記下座標，日後跟著雷達找回來。</p>
+    <button id="newBtn" class="btn primary">記錄新墓位</button>
+
+    <label for="q" style="margin-top:20px">搜尋</label>
+    <input id="q" type="text" placeholder="姓名、墓園、墓位或備註" autocomplete="off">
+    <label for="qMonth">記錄的年月</label>
+    <select id="qMonth"></select>
+
+    <div id="list"><p class="muted" style="margin-top:16px">載入中…</p></div>
+
+    <div class="section">
+      <h2>UpNote 設定</h2>
+      <label for="s-notebook">筆記本名稱（可留空）</label>
+      <input id="s-notebook" type="text" placeholder="例如：墓位紀錄" autocomplete="off">
+      <p class="muted">留空時，筆記會建在 UpNote 的預設位置。</p>
+    </div>
+
+    <div class="section">
+      <h2>備份</h2>
+      <p class="muted">資料（含照片、影片）只存在這支手機的這個瀏覽器裡，不會自動同步。匯出的檔案可以自己傳到 Google Drive、iCloud 或其他地方保存；換手機或清除瀏覽資料前，請先匯出。含影片的備份檔會比較大，請耐心等候。</p>
+      <p id="storageInfo" class="muted"></p>
+      <div class="row">
+        <button id="expBtn" class="btn plain">匯出備份</button>
+        <label class="btn plain" style="margin:0;font-weight:600" for="impIn" tabindex="0" id="impLabel">匯入備份</label>
+      </div>
+      <input id="impIn" type="file" accept="application/json,.json" hidden>
+    </div>
+  </section>
+
+  <!-- 記錄 -->
+  <section id="v-record" class="view" hidden>
+    <h2 id="recordTitle">記錄新墓位</h2>
+
+    <label for="f-name">亡者姓名或稱呼</label>
+    <input id="f-name" type="text" autocomplete="off">
+
+    <label for="f-cemetery">墓園名稱</label>
+    <input id="f-cemetery" type="text" autocomplete="off">
+
+    <label for="f-plot">墓區／排／號</label>
+    <input id="f-plot" type="text" autocomplete="off" placeholder="例如：C 區 第 5 排 12 號">
+
+    <label for="f-note">路線備註</label>
+    <textarea id="f-note" placeholder="例如：從福德祠旁石階上去，左轉第三條小路"></textarea>
+
+    <label>墓位定位</label>
+    <div class="fixbox">
+      <p id="fixMsg">請站在墓前，手機拿穩，按下按鈕後約 15 秒不要移動。</p>
+      <button id="fixBtn" class="btn primary">站在墓前，開始定位</button>
+      <button id="fixDone" class="btn plain" style="margin-top:10px" hidden>夠準了，提早完成</button>
+    </div>
+
+    <label for="photoIn">照片與影片</label>
+    <input id="photoIn" type="file" accept="image/*,video/*" multiple hidden>
+    <label class="btn plain" for="photoIn" id="photoLabel" tabindex="0" style="margin:0;font-weight:600">拍照、錄影或選擇檔案</label>
+    <p class="hint">數量沒有上限，但影片檔案較大，建議每段控制在 30 秒以內，避免佔滿手機空間。</p>
+    <div id="thumbs" class="thumbs"></div>
+
+    <div class="row" style="margin-top:28px">
+      <button id="cancelBtn" class="btn plain">取消</button>
+      <button id="saveBtn" class="btn primary" disabled>儲存</button>
+    </div>
+    <p id="saveHint" class="muted" style="margin-top:8px">需要填姓名並完成定位，才能儲存。</p>
+  </section>
+
+  <!-- 尋墓 -->
+  <section id="v-radar" class="view" hidden>
+    <h2 id="rName"></h2>
+    <p id="rWhere" class="muted" style="margin:0"></p>
+
+    <svg id="radarSvg" class="radar" viewBox="-104 -104 208 208" role="img" aria-label="尋墓雷達畫面">
+      <circle class="bezel" r="103"/>
+      <circle class="bezel-ring" r="96"/>
+      <circle class="lcd" r="90"/>
+      <circle class="grid" r="30"/>
+      <circle class="grid" r="60"/>
+      <circle class="grid" r="90"/>
+      <line class="grid" x1="-90" y1="0" x2="90" y2="0"/>
+      <line class="grid" x1="0" y1="-90" x2="0" y2="90"/>
+      <circle id="accCircle" class="accz" r="0"/>
+      <g id="northMark" class="nm"><circle r="7"/><text y="3.5">北</text></g>
+      <g id="blip" visibility="hidden">
+        <g id="blipDot"><circle class="pulse" r="6"/><circle class="dot" r="5"/></g>
+        <g id="blipStar" visibility="hidden"><circle class="starGlow" r="12"/>
+          <path class="star" d="M 0,-9 L 2.12,-2.91 L 8.56,-2.78 L 3.42,1.11 L 5.29,7.28 L 0,3.6 L -5.29,7.28 L -3.42,1.11 L -8.56,-2.78 L -2.12,-2.91 Z"/>
+        </g>
+      </g>
+      <path class="me" d="M0,-8 L6,7 L0,3.5 L-6,7 Z"/>
+    </svg>
+    <p id="rCaption" class="caption">按下「開始尋墓」後，畫面會動起來。</p>
+
+    <div class="readout" aria-live="polite">
+      <div id="rDist" class="dist">—</div>
+      <div id="rDir" class="where">&nbsp;</div>
+      <p id="rState" class="state">請直立拿手機，並允許定位與方向存取。</p>
+    </div>
+
+    <div style="margin-top:14px"><button id="rStart" class="btn primary">開始尋墓</button></div>
+    <div class="row">
+      <a id="mapG" class="btn plain" target="_blank" rel="noopener">Google 地圖</a>
+      <a id="mapA" class="btn plain" target="_blank" rel="noopener">Apple 地圖</a>
+    </div>
+    <p class="muted" style="margin-top:8px">地圖適合帶你到墓園入口；進到園區內，再用雷達走最後一段。</p>
+
+    <div class="section">
+      <h2>墓位資料</h2>
+      <button id="editBtn" class="btn plain" style="margin:8px 0 14px">編輯這筆資料</button>
+      <dl>
+        <dt>座標</dt><dd id="dCoord" class="coord"></dd>
+        <dt>墓位</dt><dd id="dPlot"></dd>
+        <dt>路線備註</dt><dd id="dNote"></dd>
+        <dt>記錄時間</dt><dd id="dTime"></dd>
+      </dl>
+      <div id="dPhotos" class="photos"><p class="muted">載入媒體中…</p></div>
+    </div>
+
+    <div class="section">
+      <h2>UpNote</h2>
+      <button id="unBtn" class="btn primary" style="margin-top:8px">存到 UpNote</button>
+      <button id="copyBtn" class="btn plain" style="margin-top:10px">複製筆記文字</button>
+      <p class="muted" style="margin-top:8px">筆記會含座標與地圖連結。照片和影片不會一起送進 UpNote，需要的話請另外存取。</p>
+    </div>
+
+    <div class="section">
+      <button id="delBtn" class="btn danger">刪除這筆墓位</button>
+    </div>
+  </section>
+</main>
+
+<div id="lightbox" hidden></div>
+<div id="toast" hidden></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- 小工具 ---------- */
+var SKEY='xunmu.settings.v1';
+var OLD_KEY='xunmu.graves.v1'; // 舊版（localStorage）資料，開機時搬過來
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function readLocal(k,fb){try{var v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch(e){return fb;}}
+function writeLocal(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function fmtDate(t){var d=new Date(t);return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate();}
+function ymd(){var d=new Date(),p=function(n){return (n<10?'0':'')+n;};return ''+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate());}
+function fmtBytes(n){
+  if(n<1024) return n+' B';
+  if(n<1024*1024) return (n/1024).toFixed(0)+' KB';
+  return (n/1024/1024).toFixed(1)+' MB';
+}
+var toastTimer=0;
+function toast(msg){var t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.hidden=true;},2600);}
+
+var settings=Object.assign({notebook:''},readLocal(SKEY,{}));
+
+/* ---------- IndexedDB：graves（資料）+ media（照片/影片） ---------- */
+function reqp(req){return new Promise(function(res,rej){req.onsuccess=function(){res(req.result);};req.onerror=function(){rej(req.error);};});}
+var dbPromise=new Promise(function(resolve,reject){
+  if(!window.indexedDB){reject(new Error('no-indexeddb'));return;}
+  var req=indexedDB.open('xunmu-db',1);
+  req.onupgradeneeded=function(){
+    var db=req.result;
+    if(!db.objectStoreNames.contains('graves')) db.createObjectStore('graves',{keyPath:'id'});
+    if(!db.objectStoreNames.contains('media')){
+      var ms=db.createObjectStore('media',{keyPath:'id'});
+      ms.createIndex('byGrave','graveId',{unique:false});
+    }
+  };
+  req.onsuccess=function(){resolve(req.result);};
+  req.onerror=function(){reject(req.error);};
+});
+function tx(stores,mode){return dbPromise.then(function(db){return db.transaction(stores,mode);});}
+function idbGetAllGraves(){
+  return tx(['graves'],'readonly').then(function(t){return reqp(t.objectStore('graves').getAll());});
+}
+function idbPutGrave(g){
+  return tx(['graves'],'readwrite').then(function(t){
+    return new Promise(function(res,rej){
+      t.objectStore('graves').put(g);
+      t.oncomplete=function(){res();};
+      t.onabort=function(){rej(t.error||new Error('quota'));};
+      t.onerror=function(){rej(t.error);};
+    });
+  });
+}
+function idbDeleteGraveAndMedia(id){
+  return tx(['graves','media'],'readwrite').then(function(t){
+    return new Promise(function(res,rej){
+      t.objectStore('graves').delete(id);
+      var idx=t.objectStore('media').index('byGrave');
+      idx.openCursor(IDBKeyRange.only(id)).onsuccess=function(e){
+        var c=e.target.result; if(c){t.objectStore('media').delete(c.primaryKey);c.continue();}
+      };
+      t.oncomplete=function(){res();};
+      t.onerror=function(){rej(t.error);};
+    });
+  });
+}
+function idbAddMedia(item){
+  return tx(['media'],'readwrite').then(function(t){
+    return new Promise(function(res,rej){
+      t.objectStore('media').put(item);
+      t.oncomplete=function(){res();};
+      t.onabort=function(){rej(t.error||new Error('quota'));};
+      t.onerror=function(){rej(t.error);};
+    });
+  });
+}
+function idbGetMediaForGrave(id){
+  return tx(['media'],'readonly').then(function(t){
+    return reqp(t.objectStore('media').index('byGrave').getAll(IDBKeyRange.only(id)));
+  });
+}
+function idbDeleteMediaIds(ids){
+  if(!ids.length) return Promise.resolve();
+  return tx(['media'],'readwrite').then(function(t){
+    return new Promise(function(res,rej){
+      ids.forEach(function(id){t.objectStore('media').delete(id);});
+      t.oncomplete=function(){res();};
+      t.onerror=function(){rej(t.error);};
+    });
+  });
+}
+
+/* 從舊版 localStorage 搬資料過來（只需要跑一次） */
+function migrateOld(){
+  var old=readLocal(OLD_KEY,null);
+  if(!old||!Array.isArray(old)||!old.length) return Promise.resolve();
+  var chain=Promise.resolve();
+  old.forEach(function(g){
+    chain=chain.then(function(){
+      var meta={id:g.id||uid(),name:g.name||'',cemetery:g.cemetery||'',plot:g.plot||'',note:g.note||'',
+        lat:g.lat,lng:g.lng,acc:g.acc||0,time:g.time||Date.now()};
+      return idbPutGrave(meta).then(function(){
+        var photos=Array.isArray(g.photos)?g.photos:[];
+        var pchain=Promise.resolve();
+        photos.forEach(function(dataUrl){
+          pchain=pchain.then(function(){
+            return fetch(dataUrl).then(function(r){return r.blob();}).then(function(blob){
+              return idbAddMedia({id:uid(),graveId:meta.id,kind:'image',mime:blob.type||'image/jpeg',size:blob.size,blob:blob,time:meta.time});
+            }).catch(function(){});
+          });
+        });
+        return pchain;
+      });
+    });
+  });
+  return chain.then(function(){try{localStorage.removeItem(OLD_KEY);}catch(e){}});
+}
+
+/* ---------- 地理計算 ---------- */
+var EARTH=6371000;
+function rad(d){return d*Math.PI/180;}
+function deg(r){return r*180/Math.PI;}
+function distance(a,b){
+  var dLat=rad(b.lat-a.lat), dLng=rad(b.lng-a.lng);
+  var s=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return 2*EARTH*Math.asin(Math.sqrt(s));
+}
+function bearing(a,b){
+  var y=Math.sin(rad(b.lng-a.lng))*Math.cos(rad(b.lat));
+  var x=Math.cos(rad(a.lat))*Math.sin(rad(b.lat))-Math.sin(rad(a.lat))*Math.cos(rad(b.lat))*Math.cos(rad(b.lng-a.lng));
+  return (deg(Math.atan2(y,x))+360)%360;
+}
+var DIRS=['北','東北','東','東南','南','西南','西','西北'];
+var REL=['正前方','右前方','右方','右後方','正後方','左後方','左方','左前方'];
+function dirName(b){return DIRS[Math.round(b/45)%8];}
+function relName(r){return REL[Math.round(r/45)%8];}
+function fmtDist(d){
+  if(d<10) return d.toFixed(1)+' 公尺';
+  if(d<1000) return Math.round(d)+' 公尺';
+  return (d/1000).toFixed(1)+' 公里';
+}
+var RANGES=[10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000];
+function niceRange(d){var need=d*1.15;for(var i=0;i<RANGES.length;i++){if(need<=RANGES[i])return RANGES[i];}return Math.ceil(need/100000)*100000;}
+function geoErrText(err){
+  if(err&&err.code===1) return '無法使用定位。請到 設定 > 隱私權與安全性 > 定位服務，允許 Safari（或這個主畫面圖示）使用位置，再回來重試。';
+  if(err&&err.code===3) return '定位逾時。請移到較空曠的地方再試一次。';
+  return '目前取不到位置。請移到較空曠的地方，並確認手機的定位服務已開啟。';
+}
+
+/* ---------- 畫面切換 ---------- */
+function show(name){
+  ['home','record','radar'].forEach(function(v){$('v-'+v).hidden=(v!==name);});
+  $('back').hidden=(name==='home');
+  if(name!=='radar') stopRadar();
+  if(name!=='record') stopFix();
+  window.scrollTo(0,0);
+}
+$('back').onclick=function(){show('home');};
+
+/* ---------- 清單 ---------- */
+var graves=[];
+function refreshHome(){
+  return idbGetAllGraves().then(function(list){graves=list;renderHome();updateStorageInfo();});
+}
+function monthKey(t){var d=new Date(t);return d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1);}
+function monthLabel(key){var p=key.split('-');return p[0]+'年'+parseInt(p[1],10)+'月';}
+function populateMonthOptions(){
+  var sel=$('qMonth'), keep=sel.value;
+  var keys={}; graves.forEach(function(g){keys[monthKey(g.time)]=true;});
+  var list=Object.keys(keys).sort().reverse();
+  var html='<option value="">不限年月</option>'+list.map(function(k){return '<option value="'+k+'">'+monthLabel(k)+'</option>';}).join('');
+  sel.innerHTML=html;
+  if(keep&&keys[keep]) sel.value=keep;
+}
+function renderHome(){
+  populateMonthOptions();
+  var box=$('list');
+  if(!graves.length){
+    box.innerHTML='<p class="empty">還沒有記錄。陪家屬到墓地時，按下「記錄新墓位」，站在墓前定位並拍照或錄影。</p>';
+    return;
+  }
+  var q=$('q').value.trim().toLowerCase();
+  var month=$('qMonth').value;
+  var filtered=graves.filter(function(g){
+    if(month&&monthKey(g.time)!==month) return false;
+    if(!q) return true;
+    var hay=[g.name,g.cemetery,g.plot,g.note].join(' ').toLowerCase();
+    return hay.indexOf(q)!==-1;
+  });
+  if(!filtered.length){
+    box.innerHTML='<p class="empty">沒有符合條件的墓位，換個關鍵字或年月再試試。</p>';
+    return;
+  }
+  var groups={}, order=[];
+  filtered.forEach(function(g){
+    var key=g.cemetery.trim()||'未指定墓園';
+    if(!groups[key]){groups[key]=[];order.push(key);}
+    groups[key].push(g);
+  });
+  order.sort(function(a,b){
+    if(a==='未指定墓園') return 1;
+    if(b==='未指定墓園') return -1;
+    return a.localeCompare(b,'zh-Hant');
+  });
+  box.innerHTML=order.map(function(key){
+    var items=groups[key].slice().sort(function(a,b){return a.name.localeCompare(b.name,'zh-Hant');});
+    var head='<h3 class="grp-head">'+esc(key)+'（'+items.length+'）</h3>';
+    var cards=items.map(function(g){
+      var place=g.plot?('<p>'+esc(g.plot)+'</p>'):'';
+      return '<article class="grave"><h3>'+esc(g.name)+'</h3>'+place+
+        '<p class="muted">'+fmtDate(g.time)+' 記錄，定位誤差約 ±'+esc(g.acc)+' 公尺</p>'+
+        '<button class="btn primary" data-go="'+esc(g.id)+'">開始尋墓</button></article>';
+    }).join('');
+    return head+cards;
+  }).join('');
+}
+$('list').addEventListener('click',function(e){
+  var b=e.target.closest('[data-go]'); if(b) openRadar(b.getAttribute('data-go'));
+});
+$('q').addEventListener('input',renderHome);
+$('qMonth').addEventListener('change',renderHome);
+$('s-notebook').value=settings.notebook||'';
+$('s-notebook').onchange=function(){settings.notebook=this.value.trim();writeLocal(SKEY,settings);toast('已儲存筆記本名稱');};
+
+function updateStorageInfo(){
+  var el=$('storageInfo');
+  if(navigator.storage&&navigator.storage.estimate){
+    navigator.storage.estimate().then(function(est){
+      if(est&&est.usage!=null&&est.quota){
+        el.textContent='目前已使用約 '+fmtBytes(est.usage)+'，這支手機還可以用大約 '+fmtBytes(est.quota-est.usage)+'。';
+      }else{el.textContent='';}
+    }).catch(function(){el.textContent='';});
+  }else{el.textContent='';}
+}
+
+/* ---------- 記錄新墓位 ---------- */
+var draft=null;
+var editId=null;
+var editOriginalTime=null;
+var removedMediaIds=[];
+var fix={watch:null,tick:null,samples:[],left:0};
+
+function openRecord(existingGrave){
+  editId=existingGrave?existingGrave.id:null;
+  editOriginalTime=existingGrave?existingGrave.time:null;
+  removedMediaIds=[];
+  $('recordTitle').textContent=existingGrave?'編輯墓位資料':'記錄新墓位';
+  $('saveBtn').textContent=existingGrave?'儲存修改':'儲存';
+  if(existingGrave){
+    $('f-name').value=existingGrave.name||'';
+    $('f-cemetery').value=existingGrave.cemetery||'';
+    $('f-plot').value=existingGrave.plot||'';
+    $('f-note').value=existingGrave.note||'';
+    draft={media:[],lat:existingGrave.lat,lng:existingGrave.lng,acc:existingGrave.acc};
+    show('record');
+    renderDraft();
+    $('thumbs').innerHTML='<p class="muted">載入媒體中…</p>';
+    idbGetMediaForGrave(existingGrave.id).then(function(list){
+      if(editId!==existingGrave.id) return; // 使用者已離開編輯畫面
+      draft.media=list.map(function(m){
+        return {id:m.id,kind:m.kind,blob:m.blob,url:URL.createObjectURL(m.blob),existing:true};
+      });
+      renderDraft();
+    }).catch(function(){toast('媒體載入失敗');});
+  }else{
+    ['f-name','f-cemetery','f-plot','f-note'].forEach(function(id){$(id).value='';});
+    draft={media:[],lat:null,lng:null,acc:null};
+    setFixMsg('請站在墓前，手機拿穩，按下按鈕後約 15 秒不要移動。');
+    renderDraft();
+    show('record');
+  }
+}
+function setFixMsg(t,cls){var m=$('fixMsg');m.textContent=t;m.className=cls||'';}
+function revokeDraftUrls(){draft.media.forEach(function(m){if(m.url) URL.revokeObjectURL(m.url);});}
+function renderDraft(){
+  var has=draft.lat!=null;
+  $('fixBtn').disabled=false;
+  $('fixBtn').textContent=has?'重新定位':'站在墓前，開始定位';
+  $('fixDone').hidden=true;
+  if(has) setFixMsg('已鎖定 '+draft.lat.toFixed(6)+', '+draft.lng.toFixed(6)+'（誤差約 ±'+draft.acc+' 公尺）','ok');
+  $('thumbs').innerHTML=draft.media.map(function(m,i){
+    var inner=m.kind==='video'
+      ? '<video src="'+m.url+'" muted playsinline preload="metadata"></video><span class="tag">影片 '+fmtBytes(m.blob.size)+'</span>'
+      : '<img src="'+m.url+'" alt="墓位照片 '+(i+1)+'">';
+    return '<div class="thumb">'+inner+'<button type="button" data-rm="'+i+'" aria-label="移除這個檔案">×</button></div>';
+  }).join('');
+  updateSave();
+}
+function updateSave(){
+  var ok=draft&&draft.lat!=null&&$('f-name').value.trim().length>0;
+  $('saveBtn').disabled=!ok;
+  $('saveHint').hidden=ok;
+}
+$('f-name').addEventListener('input',updateSave);
+$('newBtn').onclick=openRecord;
+$('cancelBtn').onclick=function(){
+  var back=editId;
+  revokeDraftUrls();
+  if(back){openRadar(back);}else{show('home');}
+};
+$('thumbs').addEventListener('click',function(e){
+  var b=e.target.closest('[data-rm]'); if(!b) return;
+  var i=+b.getAttribute('data-rm');
+  var item=draft.media[i];
+  if(item.existing) removedMediaIds.push(item.id);
+  if(item.url) URL.revokeObjectURL(item.url);
+  draft.media.splice(i,1); renderDraft();
+});
+
+function stopFix(){
+  if(fix.watch!=null&&navigator.geolocation){navigator.geolocation.clearWatch(fix.watch);}
+  fix.watch=null;
+  if(fix.tick){clearInterval(fix.tick);fix.tick=null;}
+}
+function updateFixMsg(){
+  var best=fix.samples.reduce(function(m,s){return Math.min(m,s.acc);},Infinity);
+  var n=fix.samples.length;
+  setFixMsg(n?('定位中，請站在墓前不要移動。剩 '+fix.left+' 秒，已取得 '+n+' 筆，目前最佳誤差 ±'+Math.round(best)+' 公尺。')
+             :('正在取得位置…剩 '+fix.left+' 秒。'));
+}
+function startFix(){
+  if(!navigator.geolocation){setFixMsg('這個瀏覽器不支援定位。','bad');return;}
+  stopFix();
+  fix.samples=[]; fix.left=15;
+  $('fixBtn').disabled=true; $('fixBtn').textContent='定位中…'; $('fixDone').hidden=false;
+  fix.watch=navigator.geolocation.watchPosition(function(p){
+    fix.samples.push({lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy||999});
+    updateFixMsg();
+  },function(err){
+    stopFix(); renderDraft(); setFixMsg(geoErrText(err),'bad');
+  },{enableHighAccuracy:true,maximumAge:0,timeout:20000});
+  fix.tick=setInterval(function(){fix.left--;updateFixMsg();if(fix.left<=0)finishFix();},1000);
+  updateFixMsg();
+}
+function finishFix(){
+  var s=fix.samples.slice();
+  stopFix();
+  if(!s.length){
+    renderDraft();
+    setFixMsg('沒有取得位置。請到較空曠的地方，確認已允許使用定位，再按一次。','bad');
+    return;
+  }
+  s.sort(function(a,b){return a.acc-b.acc;});
+  var use=s.slice(0,Math.max(1,Math.ceil(s.length/2)));
+  var w=0,la=0,ln=0;
+  use.forEach(function(x){var k=1/(x.acc*x.acc);w+=k;la+=x.lat*k;ln+=x.lng*k;});
+  draft.lat=la/w; draft.lng=ln/w; draft.acc=Math.max(1,Math.round(s[0].acc));
+  renderDraft();
+}
+$('fixBtn').onclick=startFix;
+$('fixDone').onclick=finishFix;
+
+function shrinkImage(file,max,q){
+  return new Promise(function(res,rej){
+    var url=URL.createObjectURL(file), img=new Image();
+    img.onload=function(){
+      var s=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+      var c=document.createElement('canvas');
+      c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(function(blob){blob?res(blob):rej(new Error('blob'));},'image/jpeg',q);
+    };
+    img.onerror=function(){URL.revokeObjectURL(url);rej(new Error('img'));};
+    img.src=url;
+  });
+}
+$('photoIn').addEventListener('change',function(e){
+  var files=Array.prototype.slice.call(e.target.files); e.target.value='';
+  files.reduce(function(chain,f){
+    return chain.then(function(){
+      if(f.type.indexOf('image/')===0){
+        return shrinkImage(f,1000,0.75).then(function(blob){
+          draft.media.push({id:uid(),kind:'image',blob:blob,url:URL.createObjectURL(blob)});
+        },function(){toast('有一張照片無法讀取');});
+      }
+      if(f.type.indexOf('video/')===0){
+        draft.media.push({id:uid(),kind:'video',blob:f,url:URL.createObjectURL(f)});
+        return null;
+      }
+      toast('不支援這種檔案格式'); return null;
+    });
+  },Promise.resolve()).then(renderDraft);
+});
+function kbdLabel(el,input){el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();input.click();}});}
+kbdLabel($('photoLabel'),$('photoIn'));
+kbdLabel($('impLabel'),$('impIn'));
+
+$('saveBtn').onclick=function(){
+  if(draft.lat==null) return;
+  var isEdit=!!editId;
+  var id=isEdit?editId:uid();
+  var time=isEdit?editOriginalTime:Date.now();
+  var meta={id:id,name:$('f-name').value.trim(),cemetery:$('f-cemetery').value.trim(),
+    plot:$('f-plot').value.trim(),note:$('f-note').value.trim(),
+    lat:draft.lat,lng:draft.lng,acc:draft.acc,time:time};
+  var newMedia=draft.media.filter(function(m){return !m.existing;});
+  var toDelete=removedMediaIds.slice();
+  var doneText=isEdit?'儲存修改':'儲存';
+  $('saveBtn').disabled=true; $('saveBtn').textContent='儲存中…';
+  idbPutGrave(meta).then(function(){
+    return idbDeleteMediaIds(toDelete);
+  }).then(function(){
+    var chain=Promise.resolve();
+    newMedia.forEach(function(m){
+      chain=chain.then(function(){
+        return idbAddMedia({id:m.id,graveId:id,kind:m.kind,mime:m.blob.type,size:m.blob.size,blob:m.blob,time:time});
+      });
+    });
+    return chain;
+  }).then(function(){
+    revokeDraftUrls();
+    return refreshHome();
+  }).then(function(){
+    $('saveBtn').disabled=false; $('saveBtn').textContent=doneText;
+    openRadar(id);
+    toast(isEdit?'已更新':'已儲存');
+  }).catch(function(err){
+    $('saveBtn').disabled=false; $('saveBtn').textContent=doneText;
+    if(!isEdit) idbDeleteGraveAndMedia(id).catch(function(){});
+    alert('儲存空間不足，無法存入（通常是影片太多）。請先刪除幾段影片，或匯出備份後清一些空間再試一次。');
+  });
+};
+
+/* ---------- 尋墓雷達 ---------- */
+var R={grave:null,pos:null,heading:null,watch:null,on:false,compassDenied:false,compass:false,arrived:false,raf:0,wake:null};
+var audioCtx=null;
+function ensureAudio(){
+  if(!audioCtx){
+    try{var AC=window.AudioContext||window.webkitAudioContext;if(AC) audioCtx=new AC();}catch(e){}
+  }
+  if(audioCtx&&audioCtx.state==='suspended'){audioCtx.resume().catch(function(){});}
+}
+function playArrivalAlert(){
+  if(audioCtx){
+    try{
+      var t0=audioCtx.currentTime, count=8, period=0.4, toneLen=0.15;
+      for(var i=0;i<count;i++){
+        var osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+        osc.type='square'; osc.frequency.value=880;
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        var start=t0+i*period;
+        gain.gain.setValueAtTime(0.0001,start);
+        gain.gain.linearRampToValueAtTime(0.25,start+0.01);
+        gain.gain.linearRampToValueAtTime(0.0001,start+toneLen);
+        osc.start(start); osc.stop(start+toneLen+0.02);
+      }
+    }catch(e){}
+  }
+  if(navigator.vibrate){
+    try{navigator.vibrate(new Array(15).fill(200));}catch(e){}
+  }
+}
+var radarMediaUrls=[];
+function revokeRadarUrls(){radarMediaUrls.forEach(function(u){URL.revokeObjectURL(u);});radarMediaUrls=[];}
+
+function openRadar(id){
+  var g=graves.filter(function(x){return x.id===id;})[0];
+  if(!g){ // 可能是剛存檔，graves 陣列還沒刷新
+    idbGetAllGraves().then(function(list){graves=list;openRadar(id);});
+    return;
+  }
+  R.grave=g; R.pos=null; R.heading=null; R.compass=false; R.compassDenied=false; R.arrived=false;
+  $('rName').textContent=g.name;
+  $('rWhere').textContent=[g.cemetery,g.plot].filter(Boolean).join('　');
+  $('mapG').href='https://www.google.com/maps/dir/?api=1&destination='+g.lat.toFixed(6)+','+g.lng.toFixed(6)+'&travelmode=walking';
+  $('mapA').href='https://maps.apple.com/?daddr='+g.lat.toFixed(6)+','+g.lng.toFixed(6)+'&dirflg=w';
+  $('dCoord').textContent=g.lat.toFixed(6)+', '+g.lng.toFixed(6)+'（誤差約 ±'+g.acc+' 公尺）';
+  $('dPlot').textContent=g.plot||'（未填）';
+  $('dNote').textContent=g.note||'（未填）';
+  $('dTime').textContent=fmtDate(g.time);
+  $('rStart').textContent='開始尋墓';
+  revokeRadarUrls();
+  $('dPhotos').innerHTML='<p class="muted">載入媒體中…</p>';
+  idbGetMediaForGrave(id).then(function(list){
+    if(!R.grave||R.grave.id!==id) return; // 使用者已經離開這一筆
+    if(!list.length){$('dPhotos').innerHTML='<p class="muted">沒有照片或影片。</p>';return;}
+    $('dPhotos').innerHTML=list.map(function(m,i){
+      var url=URL.createObjectURL(m.blob); radarMediaUrls.push(url);
+      return m.kind==='video'
+        ? '<video src="'+url+'" controls playsinline preload="metadata"></video>'
+        : '<img src="'+url+'" alt="墓位照片 '+(i+1)+'" data-zoom="'+i+'">';
+    }).join('');
+  }).catch(function(){$('dPhotos').innerHTML='<p class="muted">媒體載入失敗。</p>';});
+  show('radar');
+  drawRadar();
+}
+function onOrient(e){
+  var h=null;
+  if(typeof e.webkitCompassHeading==='number'&&!isNaN(e.webkitCompassHeading)) h=e.webkitCompassHeading;
+  else if((e.absolute===true||e.type==='deviceorientationabsolute')&&e.alpha!=null) h=(360-e.alpha)%360;
+  if(h==null) return;
+  if(R.heading==null) R.heading=h;
+  else{var d=((h-R.heading+540)%360)-180;R.heading=(R.heading+d*0.25+360)%360;}
+  R.compass=true;
+  schedule();
+}
+function onPos(p){
+  R.pos={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy||0};
+  schedule();
+}
+function onPosErr(err){
+  R.pos=null;
+  var s=$('rState'); s.textContent=geoErrText(err); s.className='state warn';
+  schedule();
+}
+function schedule(){
+  if(R.raf) return;
+  R.raf=requestAnimationFrame(function(){R.raf=0;drawRadar();});
+}
+function lockScreen(){
+  try{
+    if(navigator.wakeLock&&navigator.wakeLock.request){
+      navigator.wakeLock.request('screen').then(function(l){R.wake=l;},function(){});
+    }
+  }catch(e){}
+}
+document.addEventListener('visibilitychange',function(){if(R.on&&document.visibilityState==='visible')lockScreen();});
+
+function startRadar(){
+  if(R.on) return;
+  if(!navigator.geolocation){var s=$('rState');s.textContent='這個瀏覽器不支援定位。';s.className='state warn';return;}
+  ensureAudio();
+  R.on=true; R.arrived=false;
+  $('rStart').textContent='停止尋墓';
+  var DOE=window.DeviceOrientationEvent;
+  var ask=(DOE&&typeof DOE.requestPermission==='function')?DOE.requestPermission():Promise.resolve('granted');
+  Promise.resolve(ask).catch(function(){return 'denied';}).then(function(perm){
+    if(!R.on) return;
+    R.compassDenied=(perm!=='granted');
+    if(!R.compassDenied){
+      window.addEventListener('deviceorientationabsolute',onOrient,true);
+      window.addEventListener('deviceorientation',onOrient,true);
+    }
+    R.watch=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:1000,timeout:30000});
+    lockScreen();
+    schedule();
+  });
+}
+function stopRadar(){
+  if(!R.on&&R.watch==null) return;
+  R.on=false;
+  if(R.watch!=null&&navigator.geolocation){navigator.geolocation.clearWatch(R.watch);}
+  R.watch=null;
+  window.removeEventListener('deviceorientationabsolute',onOrient,true);
+  window.removeEventListener('deviceorientation',onOrient,true);
+  try{if(R.wake){R.wake.release();}}catch(e){}
+  R.wake=null;
+  R.arrived=false;
+  $('blipDot').setAttribute('visibility','visible');
+  $('blipStar').setAttribute('visibility','hidden');
+  $('rStart').textContent='開始尋墓';
+}
+$('rStart').onclick=function(){if(R.on){stopRadar();}else{startRadar();}};
+
+function drawRadar(){
+  var g=R.grave; if(!g) return;
+  var heading=R.heading==null?0:R.heading, p=R.pos;
+  var nr=-rad(heading);
+  $('northMark').setAttribute('transform','translate('+(80*Math.sin(nr)).toFixed(1)+' '+(-80*Math.cos(nr)).toFixed(1)+')');
+
+  var blip=$('blip'), acc=$('accCircle');
+  var dEl=$('rDist'), dirEl=$('rDir'), st=$('rState'), cap=$('rCaption');
+  if(!p){
+    blip.setAttribute('visibility','hidden'); acc.setAttribute('r',0);
+    dEl.textContent='—'; dirEl.innerHTML='&nbsp;';
+    if(!/^無法|^目前取不到|^定位逾時|^這個瀏覽器/.test(st.textContent)||!st.classList.contains('warn')){
+      st.className='state';
+      st.textContent=R.on?'正在取得你的位置…':'請直立拿手機，並允許定位與方向存取。';
+    }
+    cap.textContent=R.on?'':'按下「開始尋墓」後，畫面會動起來。';
+    return;
+  }
+  var d=distance(p,g), b=bearing(p,g), range=niceRange(d);
+  var rr=Math.min(d/range,1)*90, th=rad(b-heading);
+  blip.setAttribute('transform','translate('+(rr*Math.sin(th)).toFixed(1)+' '+(-rr*Math.cos(th)).toFixed(1)+')');
+  blip.setAttribute('visibility','visible');
+  acc.setAttribute('r',Math.min(p.acc/range*90,90).toFixed(1));
+  cap.textContent='外圈約 '+fmtDist(range)+'，虛線圈是目前的定位誤差範圍';
+
+  dEl.textContent=fmtDist(d);
+  if(R.compass){
+    dirEl.textContent='墓位在你的'+relName((b-heading+360)%360);
+  }else{
+    dirEl.textContent='墓位在你的'+dirName(b)+'方';
+  }
+
+  var enterR=Math.max(6,Math.max(p.acc,8));
+  if(!R.arrived&&d<=enterR){
+    R.arrived=true;
+    $('blipDot').setAttribute('visibility','hidden');
+    $('blipStar').setAttribute('visibility','visible');
+    playArrivalAlert();
+  }else if(R.arrived&&d>enterR+4){
+    R.arrived=false;
+    $('blipDot').setAttribute('visibility','visible');
+    $('blipStar').setAttribute('visibility','hidden');
+  }
+
+  var msg='定位誤差 ±'+Math.round(p.acc)+' 公尺。', cls='state';
+  if(d<=6){
+    msg='到了，墓位就在這附近。請對照墓區編號與照片。'; cls='state arrive';
+  }else if(d<=Math.max(p.acc,8)){
+    msg='已進入定位誤差範圍，箭頭不再可靠。請對照墓區編號與照片找出位置。'; cls='state arrive';
+  }else if(R.compassDenied){
+    msg+='沒有方向資料，畫面以北為上。請重新整理頁面，並在提示時選「允許」。'; cls='state warn';
+  }else if(!R.compass){
+    msg+='還沒收到羅盤資料，畫面暫以北為上；手機在空中畫 8 字可校正。';
+  }
+  st.className=cls; st.textContent=msg;
+}
+
+/* ---------- 照片／影片放大 ---------- */
+$('dPhotos').addEventListener('click',function(e){
+  var im=e.target.closest('img[data-zoom]'); if(!im) return;
+  $('lightbox').innerHTML='<img src="'+im.src+'" alt="放大檢視">';
+  $('lightbox').hidden=false;
+});
+$('lightbox').onclick=function(e){
+  if(e.target.tagName==='VIDEO') return; // 讓影片可以正常操作，不因點擊就關閉
+  this.hidden=true; this.innerHTML='';
+};
+
+/* ---------- UpNote ---------- */
+function noteText(g){
+  var la=g.lat.toFixed(6), ln=g.lng.toFixed(6), r=[];
+  r.push('- 亡者：'+g.name);
+  if(g.cemetery) r.push('- 墓園：'+g.cemetery);
+  if(g.plot) r.push('- 墓位：'+g.plot);
+  r.push('- 座標：'+la+', '+ln+'（誤差約 ±'+g.acc+' 公尺）');
+  r.push('- Google 地圖：https://www.google.com/maps?q='+la+','+ln);
+  r.push('- Apple 地圖：https://maps.apple.com/?ll='+la+','+ln);
+  if(g.note) r.push('- 路線備註：'+g.note.replace(/\s*\n\s*/g,' '));
+  r.push('- 記錄日期：'+fmtDate(g.time));
+  return r.join('\n');
+}
+$('unBtn').onclick=function(){
+  var g=R.grave; if(!g) return;
+  var url='upnote://x-callback-url/note/new?title='+encodeURIComponent('墓位｜'+g.name)+
+          '&text='+encodeURIComponent(noteText(g))+'&markdown=true';
+  if(settings.notebook) url+='&notebook='+encodeURIComponent(settings.notebook);
+  window.location.href=url;
+};
+function copyText(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    return navigator.clipboard.writeText(t).then(function(){return true;},function(){return legacyCopy(t);});
+  }
+  return Promise.resolve(legacyCopy(t));
+}
+function legacyCopy(t){
+  var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  var ok=false; try{ok=document.execCommand('copy');}catch(e){}
+  ta.remove(); return ok;
+}
+$('copyBtn').onclick=function(){
+  var g=R.grave; if(!g) return;
+  copyText('墓位｜'+g.name+'\n'+noteText(g)).then(function(ok){toast(ok?'已複製，可貼到任何筆記':'複製失敗，請改用「存到 UpNote」');});
+};
+
+$('editBtn').onclick=function(){if(R.grave) openRecord(R.grave);};
+
+$('delBtn').onclick=function(){
+  var g=R.grave; if(!g) return;
+  if(!confirm('要刪除「'+g.name+'」的墓位記錄（含照片、影片）嗎？此動作無法復原。')) return;
+  idbDeleteGraveAndMedia(g.id).then(refreshHome).then(function(){
+    revokeRadarUrls(); show('home'); toast('已刪除');
+  });
+};
+
+/* ---------- 備份 ---------- */
+function blobToDataUrl(blob){
+  return new Promise(function(res,rej){
+    var fr=new FileReader();
+    fr.onload=function(){res(fr.result);};
+    fr.onerror=function(){rej(fr.error);};
+    fr.readAsDataURL(blob);
+  });
+}
+$('expBtn').onclick=function(){
+  if(!graves.length){toast('目前沒有資料可以匯出');return;}
+  $('expBtn').disabled=true; $('expBtn').textContent='匯出中…（影片較多會比較久）';
+  var out=[]; var chain=Promise.resolve();
+  graves.forEach(function(g){
+    chain=chain.then(function(){
+      return idbGetMediaForGrave(g.id).then(function(mediaList){
+        var mchain=Promise.resolve(); var media=[];
+        mediaList.forEach(function(m){
+          mchain=mchain.then(function(){
+            return blobToDataUrl(m.blob).then(function(dataUrl){
+              media.push({kind:m.kind,mime:m.mime,dataUrl:dataUrl});
+            });
+          });
+        });
+        return mchain.then(function(){
+          out.push({id:g.id,name:g.name,cemetery:g.cemetery,plot:g.plot,note:g.note,
+            lat:g.lat,lng:g.lng,acc:g.acc,time:g.time,media:media});
+        });
+      });
+    });
+  });
+  chain.then(function(){
+    var blob=new Blob([JSON.stringify({app:'xunmu',version:2,graves:out})],{type:'application/json'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='xunmu-backup-'+ymd()+'.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(a.href);},4000);
+    $('expBtn').disabled=false; $('expBtn').textContent='匯出備份';
+  }).catch(function(){
+    $('expBtn').disabled=false; $('expBtn').textContent='匯出備份';
+    alert('匯出失敗，資料量可能太大，請稍後再試一次。');
+  });
+};
+$('impIn').addEventListener('change',function(e){
+  var f=e.target.files[0]; e.target.value=''; if(!f) return;
+  toast('匯入中，請稍候…');
+  f.text().then(function(txt){
+    var j=JSON.parse(txt), arr=Array.isArray(j)?j:j.graves;
+    if(!Array.isArray(arr)) throw new Error('bad');
+    var existingIds={}; graves.forEach(function(g){existingIds[g.id]=true;});
+    var chain=Promise.resolve(); var n=0;
+    arr.forEach(function(x){
+      if(!x||!x.id||typeof x.lat!=='number'||typeof x.lng!=='number') return;
+      var id=String(x.id);
+      if(existingIds[id]) return;
+      chain=chain.then(function(){
+        var meta={id:id,name:String(x.name||''),cemetery:String(x.cemetery||''),plot:String(x.plot||''),
+          note:String(x.note||''),lat:x.lat,lng:x.lng,acc:Number(x.acc)||0,time:Number(x.time)||Date.now()};
+        return idbPutGrave(meta).then(function(){
+          var mediaArr=Array.isArray(x.media)?x.media:(Array.isArray(x.photos)?x.photos.map(function(p){return {kind:'image',mime:'image/jpeg',dataUrl:p};}):[]);
+          var mchain=Promise.resolve();
+          mediaArr.forEach(function(m){
+            if(!m||typeof m.dataUrl!=='string'||m.dataUrl.indexOf('data:')!==0) return;
+            mchain=mchain.then(function(){
+              return fetch(m.dataUrl).then(function(r){return r.blob();}).then(function(blob){
+                return idbAddMedia({id:uid(),graveId:id,kind:m.kind==='video'?'video':'image',mime:m.mime||blob.type,size:blob.size,blob:blob,time:meta.time});
+              }).catch(function(){});
+            });
+          });
+          return mchain.then(function(){n++;});
+        });
+      });
+    });
+    return chain;
+  }).then(function(){return refreshHome();}).then(function(){toast('匯入完成');})
+  .catch(function(){alert('這不是有效的備份檔，或匯入過程中發生錯誤。');});
+});
+
+/* ---------- 啟動 ---------- */
+migrateOld().catch(function(){}).then(refreshHome).catch(function(){
+  $('list').innerHTML='<p class="empty">這個瀏覽器不支援本機儲存，無法使用本工具。請改用 Safari 或 Chrome 開啟。</p>';
+});
+show('home');
+})();
+</script>
+</body>
+</html>
