@@ -48,13 +48,26 @@ input[type=text],textarea,select{width:100%;min-height:52px;padding:12px 14px;fo
   background:#fff;border:1.5px solid var(--line);border-radius:10px}
 textarea{min-height:96px;resize:vertical}
 
-.grave{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
-.grave p{margin:2px 0}
-.grave .btn{margin-top:12px}
 .empty{margin:20px 0;padding:18px;border:1.5px dashed var(--line);border-radius:12px;color:var(--muted)}
-.grp-head{margin:24px 0 0;padding-bottom:6px;border-bottom:1.5px solid var(--line);
-  font-size:15px;font-weight:700;color:var(--gold);letter-spacing:.04em}
-.grp-head:first-child{margin-top:16px}
+
+.grp-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;
+  text-align:left;background:transparent;border:0;border-bottom:1.5px solid var(--line);
+  margin:24px 0 0;padding:10px 2px;font:inherit;font-size:15px;font-weight:700;color:var(--gold);
+  letter-spacing:.04em;cursor:pointer;min-height:44px}
+.grp-btn:first-child{margin-top:16px}
+.grp-btn .car{flex:none;font-size:14px;transition:transform .15s ease}
+.grp-btn.open .car{transform:rotate(90deg)}
+
+.rowlist{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:10px;background:var(--card)}
+.rowitem{display:block;width:100%;text-align:left;background:transparent;border:0;
+  border-bottom:1px solid var(--line);padding:12px 14px;font:inherit;color:var(--ink);
+  cursor:pointer;min-height:52px}
+.rowitem:last-child{border-bottom:none}
+.rowitem:active{background:var(--paper)}
+.rowitem .rname{font-weight:700}
+.rowitem .rmeta{display:block;margin-top:2px;font-size:13px;color:var(--muted)}
+
+.credit{margin:40px 0 4px;text-align:center;color:var(--muted);opacity:.6;font-size:12px;letter-spacing:.1em}
 
 .fixbox{margin-top:8px;padding:14px;background:var(--card);border:1px solid var(--line);border-radius:12px}
 .fixbox p{margin:0 0 10px}
@@ -122,6 +135,11 @@ dd{margin:0}
   <section id="v-home" class="view">
     <p class="sub">陪家屬到墓前記下座標，日後跟著雷達找回來。</p>
     <button id="newBtn" class="btn primary">記錄新墓位</button>
+
+    <div class="section" id="recentSection" hidden>
+      <h2>最近記錄</h2>
+      <div id="recentList"></div>
+    </div>
 
     <label for="q" style="margin-top:20px">搜尋</label>
     <input id="q" type="text" placeholder="姓名、墓園、墓位或備註" autocomplete="off">
@@ -247,6 +265,8 @@ dd{margin:0}
       <button id="delBtn" class="btn danger">刪除這筆墓位</button>
     </div>
   </section>
+
+  <p class="credit">重生禮儀 謹製</p>
 </main>
 
 <div id="lightbox" hidden></div>
@@ -414,6 +434,7 @@ $('back').onclick=function(){show('home');};
 
 /* ---------- 清單 ---------- */
 var graves=[];
+var expandedGroups={};
 function refreshHome(){
   return idbGetAllGraves().then(function(list){graves=list;renderHome();updateStorageInfo();});
 }
@@ -427,15 +448,29 @@ function populateMonthOptions(){
   sel.innerHTML=html;
   if(keep&&keys[keep]) sel.value=keep;
 }
+function rowHtml(g,showCemetery){
+  var place=g.plot?('　'+esc(g.plot)):'';
+  var extra=showCemetery&&g.cemetery?('・'+esc(g.cemetery)):'';
+  return '<button type="button" class="rowitem" data-go="'+esc(g.id)+'"><span class="rname">'+esc(g.name)+place+
+    '</span><span class="rmeta">'+fmtDate(g.time)+extra+'・誤差約 ±'+esc(g.acc)+' 公尺</span></button>';
+}
+function renderRecent(){
+  var top=graves.slice().sort(function(a,b){return b.time-a.time;}).slice(0,5);
+  $('recentList').innerHTML='<div class="rowlist">'+top.map(function(g){return rowHtml(g,true);}).join('')+'</div>';
+}
 function renderHome(){
   populateMonthOptions();
   var box=$('list');
   if(!graves.length){
+    $('recentSection').hidden=true;
     box.innerHTML='<p class="empty">還沒有記錄。陪家屬到墓地時，按下「記錄新墓位」，站在墓前定位並拍照或錄影。</p>';
     return;
   }
+  renderRecent();
   var q=$('q').value.trim().toLowerCase();
   var month=$('qMonth').value;
+  var filtering=!!(q||month);
+  $('recentSection').hidden=filtering;
   var filtered=graves.filter(function(g){
     if(month&&monthKey(g.time)!==month) return false;
     if(!q) return true;
@@ -459,17 +494,19 @@ function renderHome(){
   });
   box.innerHTML=order.map(function(key){
     var items=groups[key].slice().sort(function(a,b){return a.name.localeCompare(b.name,'zh-Hant');});
-    var head='<h3 class="grp-head">'+esc(key)+'（'+items.length+'）</h3>';
-    var cards=items.map(function(g){
-      var place=g.plot?('<p>'+esc(g.plot)+'</p>'):'';
-      return '<article class="grave"><h3>'+esc(g.name)+'</h3>'+place+
-        '<p class="muted">'+fmtDate(g.time)+' 記錄，定位誤差約 ±'+esc(g.acc)+' 公尺</p>'+
-        '<button class="btn primary" data-go="'+esc(g.id)+'">開始尋墓</button></article>';
-    }).join('');
-    return head+cards;
+    var isOpen=filtering||!!expandedGroups[key];
+    var head='<button type="button" class="grp-btn'+(isOpen?' open':'')+'" data-grp="'+esc(key)+'">'+
+      '<span>'+esc(key)+'（'+items.length+'）</span><span class="car">▸</span></button>';
+    var rows='<div class="rowlist"'+(isOpen?'':' hidden')+'>'+items.map(function(g){return rowHtml(g,false);}).join('')+'</div>';
+    return head+rows;
   }).join('');
 }
 $('list').addEventListener('click',function(e){
+  var gh=e.target.closest('[data-grp]');
+  if(gh){expandedGroups[gh.getAttribute('data-grp')]=!expandedGroups[gh.getAttribute('data-grp')];renderHome();return;}
+  var b=e.target.closest('[data-go]'); if(b) openRadar(b.getAttribute('data-go'));
+});
+$('recentList').addEventListener('click',function(e){
   var b=e.target.closest('[data-go]'); if(b) openRadar(b.getAttribute('data-go'));
 });
 $('q').addEventListener('input',renderHome);
