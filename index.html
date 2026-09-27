@@ -101,11 +101,9 @@ textarea{min-height:96px;resize:vertical}
 @media (prefers-reduced-motion:reduce){.starGlow{animation:none;opacity:.5}}
 .nm circle{fill:var(--lcd-ink)}
 .nm text{fill:var(--lcd);font-size:9px;font-weight:700;text-anchor:middle;font-family:var(--font)}
+.me{fill:var(--lcd-ink)}
 @keyframes ping{0%{transform:scale(.7);opacity:.75}100%{transform:scale(2.4);opacity:0}}
 @media (prefers-reduced-motion:reduce){.pulse{animation:none;opacity:.35}}
-#sweep{transform-box:fill-box;transform-origin:center;animation:sweepspin 3.4s linear infinite}
-@keyframes sweepspin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){#sweep{display:none}}
 
 .readout{text-align:center;margin-top:12px}
 .dist{font-size:44px;line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums}
@@ -230,12 +228,6 @@ body.radar-active::before{
     <p id="rWhere" class="muted" style="margin:0"></p>
 
     <svg id="radarSvg" class="radar" viewBox="-104 -104 208 208" role="img" aria-label="尋墓雷達畫面">
-      <defs>
-        <linearGradient id="sweepGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="var(--lcd-ink)" stop-opacity="0"/>
-          <stop offset="100%" stop-color="var(--lcd-ink)" stop-opacity=".55"/>
-        </linearGradient>
-      </defs>
       <circle class="bezel" r="103"/>
       <circle class="bezel-ring" r="96"/>
       <circle class="lcd" r="90"/>
@@ -244,7 +236,6 @@ body.radar-active::before{
       <circle class="grid" r="90"/>
       <line class="grid" x1="-90" y1="0" x2="90" y2="0"/>
       <line class="grid" x1="0" y1="-90" x2="0" y2="90"/>
-      <path id="sweep" d="M0,0 L90,0 A90,90 0 0,1 63.64,63.64 Z" fill="url(#sweepGrad)"/>
       <circle id="accCircle" class="accz" r="0"/>
       <g id="northMark" class="nm"><circle r="7"/><text y="3.5">北</text></g>
       <g id="blip" visibility="hidden">
@@ -253,6 +244,7 @@ body.radar-active::before{
           <path class="star" d="M 0,-9 L 2.12,-2.91 L 8.56,-2.78 L 3.42,1.11 L 5.29,7.28 L 0,3.6 L -5.29,7.28 L -3.42,1.11 L -8.56,-2.78 L -2.12,-2.91 Z"/>
         </g>
       </g>
+      <path class="me" d="M0,-8 L6,7 L0,3.5 L-6,7 Z"/>
     </svg>
     <p id="rCaption" class="caption">按下「開始尋墓」後，畫面會動起來。</p>
 
