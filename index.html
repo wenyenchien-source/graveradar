@@ -95,7 +95,6 @@ textarea{min-height:96px;resize:vertical}
 .accz{fill:var(--lcd-ink);fill-opacity:.1;stroke:var(--lcd-ink);stroke-width:.8;stroke-dasharray:3 3}
 .dot{fill:var(--clay)}
 .pulse{fill:var(--clay);transform-box:fill-box;transform-origin:center;animation:ping 1.8s ease-out infinite}
-.me{fill:var(--lcd-ink)}
 .star{fill:var(--gold)}
 .starGlow{fill:var(--gold);fill-opacity:.22;transform-box:fill-box;transform-origin:center;animation:starpulse 1.2s ease-in-out infinite}
 @keyframes starpulse{0%,100%{transform:scale(.85);opacity:.6}50%{transform:scale(1.25);opacity:1}}
@@ -126,7 +125,7 @@ dd{margin:0}
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);
   background:var(--bezel);color:#fff;padding:12px 18px;border-radius:12px;font-size:16px;z-index:30;max-width:90%;text-align:center}
 
-/* 尋墓畫面外觀：兩種可選 skin。radar-active 是共通的 CRT 質感，skin-amber 是深色琥珀終端機 */
+/* 尋墓畫面：復古電子錶質感的 CRT 掃描紋路與外殼陰影 */
 body.radar-active{--crt-line:rgba(59,42,29,.05);--crt-vig:rgba(0,0,0,0);--plastic:rgba(0,0,0,.12)}
 body.radar-active .radar{filter:drop-shadow(0 3px 6px var(--plastic))}
 body.radar-active .bezel-ring{stroke-width:3}
@@ -144,24 +143,6 @@ body.radar-active::before{
   99%{opacity:.8}
 }
 @media (prefers-reduced-motion:reduce){body.radar-active::before{animation:none;opacity:.9}}
-
-/* 琥珀終端機：黑底暖橘，老式電腦終端機調性，避開綠色 */
-body.skin-amber{
-  --paper:#0d0800; --card:#160e02; --ink:#ffb347; --muted:#c98a34; --line:#3a2308;
-  --clay:#ffb347; --clay-d:#ffd28c; --gold:#ffe1a8;
-  --bezel:#000000; --lcd:#0d0700; --lcd-grid:#7a4a12; --lcd-ink:#ffb347;
-  --crt-line:rgba(255,179,71,.08); --crt-vig:rgba(0,0,0,.4); --plastic:rgba(0,0,0,.4);
-}
-body.skin-amber h1,body.skin-amber h2,body.skin-amber h3{text-shadow:0 0 8px rgba(255,179,71,.35)}
-body.skin-amber .back{color:var(--clay)}
-body.skin-amber .btn.primary{background:#241203;color:var(--clay);border-color:var(--clay);box-shadow:0 0 12px rgba(255,179,71,.3)}
-body.skin-amber .btn.primary:active{background:#341a04}
-body.skin-amber .btn.plain{color:var(--ink);border-color:var(--line)}
-body.skin-amber .btn.danger{color:#ff8a6b}
-body.skin-amber .dist,body.skin-amber .where{text-shadow:0 0 10px rgba(255,179,71,.45)}
-body.skin-amber .state.arrive{color:var(--gold);text-shadow:0 0 8px rgba(255,225,168,.4)}
-body.skin-amber .state.warn{color:#ff8a6b}
-body.skin-amber #lightbox{background:rgba(13,8,0,.94)}
 </style>
 </head>
 <body>
@@ -187,16 +168,6 @@ body.skin-amber #lightbox{background:rgba(13,8,0,.94)}
     <select id="qMonth"></select>
 
     <div id="list"><p class="muted" style="margin-top:16px">載入中…</p></div>
-
-    <div class="section">
-      <h2>雷達畫面外觀</h2>
-      <label for="s-skin">尋墓畫面風格</label>
-      <select id="s-skin">
-        <option value="default">復古電子錶（米杏底）</option>
-        <option value="amber">琥珀終端機（深色）</option>
-      </select>
-      <p class="muted">只改變「尋墓」那一頁的畫面，其他頁面不受影響。</p>
-    </div>
 
     <div class="section">
       <h2>UpNote 設定</h2>
@@ -282,7 +253,6 @@ body.skin-amber #lightbox{background:rgba(13,8,0,.94)}
           <path class="star" d="M 0,-9 L 2.12,-2.91 L 8.56,-2.78 L 3.42,1.11 L 5.29,7.28 L 0,3.6 L -5.29,7.28 L -3.42,1.11 L -8.56,-2.78 L -2.12,-2.91 Z"/>
         </g>
       </g>
-      <path class="me" d="M0,-8 L6,7 L0,3.5 L-6,7 Z"/>
     </svg>
     <p id="rCaption" class="caption">按下「開始尋墓」後，畫面會動起來。</p>
 
@@ -351,7 +321,7 @@ function fmtBytes(n){
 var toastTimer=0;
 function toast(msg){var t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.hidden=true;},2600);}
 
-var settings=Object.assign({notebook:'',skin:'default'},readLocal(SKEY,{}));
+var settings=Object.assign({notebook:''},readLocal(SKEY,{}));
 
 /* ---------- IndexedDB：graves（資料）+ media（照片/影片） ---------- */
 function reqp(req){return new Promise(function(res,rej){req.onsuccess=function(){res(req.result);};req.onerror=function(){rej(req.error);};});}
@@ -484,7 +454,6 @@ function show(name){
   ['home','record','radar'].forEach(function(v){$('v-'+v).hidden=(v!==name);});
   $('back').hidden=(name==='home');
   document.body.classList.toggle('radar-active',name==='radar');
-  document.body.classList.toggle('skin-amber',name==='radar'&&settings.skin==='amber');
   if(name!=='radar') stopRadar();
   if(name!=='record') stopFix();
   window.scrollTo(0,0);
@@ -572,8 +541,6 @@ $('q').addEventListener('input',renderHome);
 $('qMonth').addEventListener('change',renderHome);
 $('s-notebook').value=settings.notebook||'';
 $('s-notebook').onchange=function(){settings.notebook=this.value.trim();writeLocal(SKEY,settings);toast('已儲存筆記本名稱');};
-$('s-skin').value=settings.skin||'default';
-$('s-skin').onchange=function(){settings.skin=this.value;writeLocal(SKEY,settings);toast('已儲存外觀設定');};
 
 function updateStorageInfo(){
   var el=$('storageInfo');
