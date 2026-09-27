@@ -67,7 +67,7 @@ textarea{min-height:96px;resize:vertical}
 .rowitem .rname{font-weight:700}
 .rowitem .rmeta{display:block;margin-top:2px;font-size:13px;color:var(--muted)}
 
-.credit{margin:40px 0 4px;text-align:center;color:var(--muted);opacity:.6;font-size:12px;letter-spacing:.1em}
+.credit{margin:40px 0 4px;text-align:center;color:var(--muted);opacity:.6;font-size:12px;letter-spacing:.1em;line-height:1.7}
 
 .fixbox{margin-top:8px;padding:14px;background:var(--card);border:1px solid var(--line);border-radius:12px}
 .fixbox p{margin:0 0 10px}
@@ -152,29 +152,47 @@ body.radar-active::before{
 
   <!-- 清單 -->
   <section id="v-home" class="view">
-    <p class="sub">陪家屬到墓前記下座標，日後跟著雷達找回來。</p>
+    <p class="sub" id="introText">陪家屬到墓前記下座標，日後跟著雷達找回來。</p>
     <button id="newBtn" class="btn primary">記錄新墓位</button>
+
+    <div class="section" id="familyLinkSection">
+      <h2>專案連結</h2>
+      <p class="muted">簡化版連結，家屬自己就能記錄墓位、拍照、分享給你，不會看到清單、UpNote 這些你在用的設定。填了下面欄位，家屬打開連結時會自動帶入，不用重新打字；家屬按「分享」也會直接開啟跟你的 LINE 聊天室。</p>
+      <label for="my-line">我的 LINE 個人連結（只需填一次）</label>
+      <input id="my-line" type="text" placeholder="例如：https://line.me/ti/p/xxxxxxxxx" autocomplete="off">
+      <p class="muted">在 LINE 的「設定 → 帳號 → 分享好友邀請連結」可以找到，跟你代訂系統用的是同一個。</p>
+      <label for="proj-name" style="margin-top:20px">往生者姓名</label>
+      <input id="proj-name" type="text" autocomplete="off">
+      <label for="proj-cemetery">墓園名稱（可留空）</label>
+      <input id="proj-cemetery" type="text" autocomplete="off">
+      <div class="row">
+        <button id="lineLinkBtn" class="btn primary">傳至 LINE</button>
+        <button id="familyLinkBtn" class="btn plain">分享專案連結</button>
+      </div>
+    </div>
 
     <div class="section" id="recentSection" hidden>
       <h2>最近記錄</h2>
       <div id="recentList"></div>
     </div>
 
-    <label for="q" style="margin-top:20px">搜尋</label>
-    <input id="q" type="text" placeholder="姓名、墓園、墓位或備註" autocomplete="off">
-    <label for="qMonth">記錄的年月</label>
-    <select id="qMonth"></select>
+    <div id="searchArea">
+      <label for="q" style="margin-top:20px">搜尋</label>
+      <input id="q" type="text" placeholder="姓名、墓園、墓位或備註" autocomplete="off">
+      <label for="qMonth">記錄的年月</label>
+      <select id="qMonth"></select>
+    </div>
 
     <div id="list"><p class="muted" style="margin-top:16px">載入中…</p></div>
 
-    <div class="section">
+    <div class="section" id="upnoteSection">
       <h2>UpNote 設定</h2>
       <label for="s-notebook">筆記本名稱（可留空）</label>
       <input id="s-notebook" type="text" placeholder="例如：墓位紀錄" autocomplete="off">
       <p class="muted">留空時，筆記會建在 UpNote 的預設位置。</p>
     </div>
 
-    <div class="section">
+    <div class="section" id="backupSection">
       <h2>備份</h2>
       <p class="muted">資料（含照片、影片）只存在這支手機的這個瀏覽器裡，不會自動同步。匯出的檔案可以自己傳到 Google Drive、iCloud 或其他地方保存；換手機或清除瀏覽資料前，請先匯出。含影片的備份檔會比較大，請耐心等候。</p>
       <p id="storageInfo" class="muted"></p>
@@ -274,6 +292,14 @@ body.radar-active::before{
     </div>
 
     <div class="section">
+      <h2>分享</h2>
+      <button id="shareLineBtn" class="btn primary" hidden>直接傳送給禮儀師</button>
+      <p id="shareLineHint" class="muted" style="margin-top:8px" hidden>文字會先複製好，按下後直接開啟跟禮儀師的 LINE 聊天室，貼上發送就好；照片請用下面「分享」另外附上。</p>
+      <button id="shareBtn" class="btn primary" style="margin-top:10px">分享（含照片）</button>
+      <p id="shareHint" class="muted" style="margin-top:8px">按下後選 LINE 或其他 App，把姓名、座標、地圖連結和照片一起傳出去。影片檔案太大，不會一起分享，需要的話請另外傳送。</p>
+    </div>
+
+    <div class="section" id="upnoteRadarSection">
       <h2>UpNote</h2>
       <button id="unBtn" class="btn primary" style="margin-top:8px">存到 UpNote</button>
       <button id="copyBtn" class="btn plain" style="margin-top:10px">複製筆記文字</button>
@@ -285,7 +311,7 @@ body.radar-active::before{
     </div>
   </section>
 
-  <p class="credit">重生禮儀 謹製</p>
+  <p class="credit">宜蘭。五結。在地三十年<br>重生禮儀 謹製</p>
 </main>
 
 <div id="lightbox" hidden></div>
@@ -294,6 +320,32 @@ body.radar-active::before{
 <script>
 (function(){
 'use strict';
+
+/* ---------- 家屬簡化模式：網址加 ?family=1 開啟（可再帶 &name=&cemetery= 預填） ---------- */
+var FAMILY_MODE=/(^|[?&])family=1(&|$)/.test(location.search);
+function getParam(key){
+  try{return new URLSearchParams(location.search).get(key);}
+  catch(e){
+    var m=new RegExp('[?&]'+key+'=([^&]*)').exec(location.search);
+    return m?decodeURIComponent(m[1].replace(/\+/g,' ')):null;
+  }
+}
+var PRESET_NAME=FAMILY_MODE?(getParam('name')||''):'';
+var PRESET_CEMETERY=FAMILY_MODE?(getParam('cemetery')||''):'';
+var PRESET_LINE=FAMILY_MODE?(getParam('line')||''):'';
+function applyFamilyMode(){
+  if(!FAMILY_MODE) return;
+  document.body.classList.add('family');
+  ['searchArea','upnoteSection','backupSection','upnoteRadarSection','familyLinkSection'].forEach(function(id){
+    var el=$(id); if(el) el.hidden=true;
+  });
+  $('introText').textContent='記錄墓地位置，方便之後自己找，也可以分享給禮儀公司。';
+  if(PRESET_LINE){
+    $('shareLineBtn').hidden=false;
+    $('shareLineHint').hidden=false;
+    $('shareBtn').className='btn plain';
+  }
+}
 
 /* ---------- 小工具 ---------- */
 var SKEY='xunmu.settings.v1';
@@ -313,7 +365,7 @@ function fmtBytes(n){
 var toastTimer=0;
 function toast(msg){var t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.hidden=true;},2600);}
 
-var settings=Object.assign({notebook:''},readLocal(SKEY,{}));
+var settings=Object.assign({notebook:'',myLine:''},readLocal(SKEY,{}));
 
 /* ---------- IndexedDB：graves（資料）+ media（照片/影片） ---------- */
 function reqp(req){return new Promise(function(res,rej){req.onsuccess=function(){res(req.result);};req.onerror=function(){rej(req.error);};});}
@@ -479,8 +531,18 @@ function renderRecent(){
   $('recentList').innerHTML='<div class="rowlist">'+top.map(function(g){return rowHtml(g,true);}).join('')+'</div>';
 }
 function renderHome(){
-  populateMonthOptions();
   var box=$('list');
+  if(FAMILY_MODE){
+    $('recentSection').hidden=true;
+    if(!graves.length){
+      box.innerHTML='<p class="empty">還沒有記錄。到墓地時按「記錄新墓位」，站在墓前定位並拍照。</p>';
+      return;
+    }
+    var flat=graves.slice().sort(function(a,b){return b.time-a.time;});
+    box.innerHTML='<div class="rowlist">'+flat.map(function(g){return rowHtml(g,true);}).join('')+'</div>';
+    return;
+  }
+  populateMonthOptions();
   if(!graves.length){
     $('recentSection').hidden=true;
     box.innerHTML='<p class="empty">還沒有記錄。陪家屬到墓地時，按下「記錄新墓位」，站在墓前定位並拍照或錄影。</p>';
@@ -533,6 +595,8 @@ $('q').addEventListener('input',renderHome);
 $('qMonth').addEventListener('change',renderHome);
 $('s-notebook').value=settings.notebook||'';
 $('s-notebook').onchange=function(){settings.notebook=this.value.trim();writeLocal(SKEY,settings);toast('已儲存筆記本名稱');};
+$('my-line').value=settings.myLine||'';
+$('my-line').onchange=function(){settings.myLine=this.value.trim();writeLocal(SKEY,settings);toast('已儲存 LINE 連結');};
 
 function updateStorageInfo(){
   var el=$('storageInfo');
@@ -576,6 +640,8 @@ function openRecord(existingGrave){
     }).catch(function(){toast('媒體載入失敗');});
   }else{
     ['f-name','f-cemetery','f-plot','f-note'].forEach(function(id){$(id).value='';});
+    if(PRESET_NAME) $('f-name').value=PRESET_NAME;
+    if(PRESET_CEMETERY) $('f-cemetery').value=PRESET_CEMETERY;
     draft={media:[],lat:null,lng:null,acc:null};
     setFixMsg('請站在墓前，手機拿穩，按下按鈕後約 15 秒不要移動。');
     renderDraft();
@@ -946,6 +1012,73 @@ function noteText(g){
   r.push('- 記錄日期：'+fmtDate(g.time));
   return r.join('\n');
 }
+function familyLinkUrl(){
+  var base=location.origin+location.pathname+'?family=1';
+  var name=$('proj-name').value.trim();
+  var cemetery=$('proj-cemetery').value.trim();
+  var myLine=settings.myLine.trim();
+  if(name) base+='&name='+encodeURIComponent(name);
+  if(cemetery) base+='&cemetery='+encodeURIComponent(cemetery);
+  if(myLine) base+='&line='+encodeURIComponent(myLine);
+  return base;
+}
+function familyLinkIntro(){
+  var name=$('proj-name').value.trim();
+  var who=name?(name+'家屬'):'您';
+  return '這是幫'+who+'記錄墓地位置用的小工具，陪同到墓地時打開它站在墓前記錄座標、拍照，之後可以直接分享回傳給我。';
+}
+var famBtn=$('familyLinkBtn');
+if(famBtn){
+  famBtn.onclick=function(){
+    var url=familyLinkUrl();
+    if(navigator.share){
+      navigator.share({title:'尋墓雷達（家屬版）',text:familyLinkIntro(),url:url}).catch(function(err){
+        if(err&&err.name==='AbortError') return;
+        copyText(url).then(function(ok){toast(ok?'已複製專案連結':'分享與複製都失敗，請手動在網址後面加上 ?family=1');});
+      });
+    }else{
+      copyText(url).then(function(ok){toast(ok?'已複製專案連結，可貼到 LINE 傳給家屬':'複製失敗，請手動在網址後面加上 ?family=1');});
+    }
+  };
+}
+var lineBtn=$('lineLinkBtn');
+if(lineBtn){
+  lineBtn.onclick=function(){
+    var msg=familyLinkIntro()+'\n'+familyLinkUrl();
+    copyText(msg).then(function(){toast('已複製文字，開啟 LINE 後選好友貼上發送');});
+    window.open('https://line.me/R/msg/text/?'+encodeURIComponent(msg),'_blank');
+  };
+}
+function shareGrave(g){
+  var title='墓位｜'+g.name, text=noteText(g);
+  if(!navigator.share){
+    copyText(title+'\n'+text).then(function(ok){
+      alert(ok?'這台裝置不支援分享功能，文字已複製，請自行貼到 LINE 或其他 App。':'分享失敗，也無法複製文字，請改用「複製筆記文字」。');
+    });
+    return;
+  }
+  idbGetMediaForGrave(g.id).then(function(list){
+    var images=list.filter(function(m){return m.kind==='image';}).slice(0,6);
+    var files=images.map(function(m,i){
+      var ext=m.mime==='image/png'?'png':(m.mime==='image/webp'?'webp':'jpg');
+      return new File([m.blob],'墓位照片'+(i+1)+'.'+ext,{type:m.blob.type||m.mime||'image/jpeg'});
+    });
+    var withFiles=files.length&&navigator.canShare&&navigator.canShare({files:files});
+    var shareData=withFiles?{title:title,text:text,files:files}:{title:title,text:text};
+    return navigator.share(shareData).catch(function(err){
+      if(err&&err.name==='AbortError') return;
+      if(withFiles) return navigator.share({title:title,text:text}).catch(function(){});
+    });
+  }).catch(function(){toast('分享失敗，請改用「複製筆記文字」');});
+}
+$('shareBtn').onclick=function(){if(R.grave) shareGrave(R.grave);};
+$('shareLineBtn').onclick=function(){
+  var g=R.grave; if(!g||!PRESET_LINE) return;
+  var text='墓位｜'+g.name+'\n'+noteText(g);
+  copyText(text).then(function(){toast('已複製文字，開啟 LINE 後貼上發送');});
+  window.open(PRESET_LINE,'_blank');
+};
+
 $('unBtn').onclick=function(){
   var g=R.grave; if(!g) return;
   var url='upnote://x-callback-url/note/new?title='+encodeURIComponent('墓位｜'+g.name)+
@@ -1058,6 +1191,7 @@ $('impIn').addEventListener('change',function(e){
 });
 
 /* ---------- 啟動 ---------- */
+applyFamilyMode();
 migrateOld().catch(function(){}).then(refreshHome).catch(function(){
   $('list').innerHTML='<p class="empty">這個瀏覽器不支援本機儲存，無法使用本工具。請改用 Safari 或 Chrome 開啟。</p>';
 });
