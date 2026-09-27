@@ -92,18 +92,21 @@ textarea{min-height:96px;resize:vertical}
 .bezel-ring{fill:none;stroke:#5a4636;stroke-width:2}
 .lcd{fill:var(--lcd)}
 .grid{fill:none;stroke:var(--lcd-grid);stroke-width:.8}
-.accz{fill:rgba(36,69,43,.10);stroke:var(--lcd-ink);stroke-width:.8;stroke-dasharray:3 3}
+.accz{fill:var(--lcd-ink);fill-opacity:.1;stroke:var(--lcd-ink);stroke-width:.8;stroke-dasharray:3 3}
 .dot{fill:var(--clay)}
 .pulse{fill:var(--clay);transform-box:fill-box;transform-origin:center;animation:ping 1.8s ease-out infinite}
 .me{fill:var(--lcd-ink)}
 .star{fill:var(--gold)}
-.starGlow{fill:rgba(143,101,38,.22);transform-box:fill-box;transform-origin:center;animation:starpulse 1.2s ease-in-out infinite}
+.starGlow{fill:var(--gold);fill-opacity:.22;transform-box:fill-box;transform-origin:center;animation:starpulse 1.2s ease-in-out infinite}
 @keyframes starpulse{0%,100%{transform:scale(.85);opacity:.6}50%{transform:scale(1.25);opacity:1}}
 @media (prefers-reduced-motion:reduce){.starGlow{animation:none;opacity:.5}}
 .nm circle{fill:var(--lcd-ink)}
 .nm text{fill:var(--lcd);font-size:9px;font-weight:700;text-anchor:middle;font-family:var(--font)}
 @keyframes ping{0%{transform:scale(.7);opacity:.75}100%{transform:scale(2.4);opacity:0}}
 @media (prefers-reduced-motion:reduce){.pulse{animation:none;opacity:.35}}
+#sweep{transform-box:fill-box;transform-origin:center;animation:sweepspin 3.4s linear infinite}
+@keyframes sweepspin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#sweep{display:none}}
 
 .readout{text-align:center;margin-top:12px}
 .dist{font-size:44px;line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums}
@@ -122,6 +125,37 @@ dd{margin:0}
 #lightbox img,#lightbox video{max-width:100%;max-height:100%;border-radius:8px}
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);
   background:var(--bezel);color:#fff;padding:12px 18px;border-radius:12px;font-size:16px;z-index:30;max-width:90%;text-align:center}
+
+/* 尋墓畫面：復古終端機（駭客任務風）配色，只在雷達頁面套用 */
+body.matrix{
+  --paper:#03110a; --card:#06190f; --ink:#3bff86; --muted:#1f8a4e; --line:#124a29;
+  --clay:#3bff86; --clay-d:#8dffbb; --gold:#ffcf5c;
+  --bezel:#010805; --lcd:#010c07; --lcd-grid:#155c33; --lcd-ink:#3bff86;
+}
+body.matrix h1,body.matrix h2,body.matrix h3{text-shadow:0 0 8px rgba(59,255,134,.35)}
+body.matrix .back{color:var(--clay)}
+body.matrix .btn.primary{background:#08240f;color:var(--clay);border-color:var(--clay);box-shadow:0 0 12px rgba(59,255,134,.3)}
+body.matrix .btn.primary:active{background:#0e3417}
+body.matrix .btn.plain{color:var(--ink);border-color:var(--line)}
+body.matrix .btn.danger{color:#ff6b6b}
+body.matrix .dist,body.matrix .where{text-shadow:0 0 10px rgba(59,255,134,.45)}
+body.matrix .state.arrive{color:var(--gold);text-shadow:0 0 8px rgba(255,207,92,.4)}
+body.matrix .state.warn{color:#ff6b6b}
+body.matrix #lightbox{background:rgba(0,8,4,.94)}
+body.matrix::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:
+    repeating-linear-gradient(to bottom,rgba(59,255,134,.05) 0px,rgba(59,255,134,.05) 1px,transparent 2px,transparent 3px),
+    radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 135%);
+  animation:crtflicker 6s infinite;
+}
+@keyframes crtflicker{
+  0%,96%,100%{opacity:.9}
+  97%{opacity:.7}
+  98%{opacity:.95}
+  99%{opacity:.75}
+}
+@media (prefers-reduced-motion:reduce){body.matrix::before{animation:none;opacity:.85}}
 </style>
 </head>
 <body>
@@ -209,6 +243,12 @@ dd{margin:0}
     <p id="rWhere" class="muted" style="margin:0"></p>
 
     <svg id="radarSvg" class="radar" viewBox="-104 -104 208 208" role="img" aria-label="尋墓雷達畫面">
+      <defs>
+        <linearGradient id="sweepGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="var(--lcd-ink)" stop-opacity="0"/>
+          <stop offset="100%" stop-color="var(--lcd-ink)" stop-opacity=".55"/>
+        </linearGradient>
+      </defs>
       <circle class="bezel" r="103"/>
       <circle class="bezel-ring" r="96"/>
       <circle class="lcd" r="90"/>
@@ -217,6 +257,7 @@ dd{margin:0}
       <circle class="grid" r="90"/>
       <line class="grid" x1="-90" y1="0" x2="90" y2="0"/>
       <line class="grid" x1="0" y1="-90" x2="0" y2="90"/>
+      <path id="sweep" d="M0,0 L90,0 A90,90 0 0,1 63.64,63.64 Z" fill="url(#sweepGrad)"/>
       <circle id="accCircle" class="accz" r="0"/>
       <g id="northMark" class="nm"><circle r="7"/><text y="3.5">北</text></g>
       <g id="blip" visibility="hidden">
@@ -426,6 +467,7 @@ function geoErrText(err){
 function show(name){
   ['home','record','radar'].forEach(function(v){$('v-'+v).hidden=(v!==name);});
   $('back').hidden=(name==='home');
+  document.body.classList.toggle('matrix',name==='radar');
   if(name!=='radar') stopRadar();
   if(name!=='record') stopFix();
   window.scrollTo(0,0);
