@@ -1198,5 +1198,33 @@ migrateOld().catch(function(){}).then(refreshHome).catch(function(){
 show('home');
 })();
 </script>
+<!-- 重生禮儀・其他工具（各工具網站互相連結） -->
+<style>
+body:has(>.cs-tools){flex-wrap:wrap}
+.cs-tools{--cs-bg:#fffdf8;--cs-ink:#3b2f26;--cs-muted:#76665a;--cs-line:#e4d9c6;--cs-accent:#c2532f;--cs-soft:#f7e4d9;
+  flex:0 0 auto;box-sizing:border-box;width:calc(100% - 32px);max-width:640px;margin:24px auto 16px;padding:16px;
+  background:var(--cs-bg);border:1px solid var(--cs-line);border-radius:14px;color:var(--cs-ink);
+  font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;font-size:16px;line-height:1.4}
+.cs-tools *{box-sizing:border-box}
+.cs-tools h2{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--cs-muted);letter-spacing:.06em;text-align:center}
+.cs-tools ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cs-tools a,.cs-tools span.cs-here{display:flex;align-items:center;gap:6px;min-height:48px;padding:8px 10px;border-radius:10px;
+  border:1.5px solid var(--cs-line);color:var(--cs-ink);text-decoration:none;font-weight:600;font-size:15px}
+.cs-tools a:hover,.cs-tools a:focus-visible{border-color:var(--cs-accent);color:var(--cs-accent)}
+.cs-tools span.cs-here{background:var(--cs-soft);border-color:var(--cs-accent);color:var(--cs-accent)}
+.cs-tools small{display:block;font-weight:400;font-size:12px;color:var(--cs-muted)}
+@media print{.cs-tools{display:none}}
+</style>
+<nav class="cs-tools" aria-label="重生禮儀其他工具">
+  <h2>重生禮儀・其他工具</h2>
+  <ul>
+    <li><a href="https://columbarium-theta.vercel.app/" target="_blank" rel="noopener">🏛 <span>塔位費用計算器</span></a></li>
+    <li><a href="https://gemini-code-1782400579879.vercel.app/" target="_blank" rel="noopener">🧭 <span>塔位安奉方位規劃書</span></a></li>
+    <li><span class="cs-here" aria-current="page">📡 <span>尋墓雷達<small>目前這一頁</small></span></span></li>
+    <li><a href="https://date3-six.vercel.app/" target="_blank" rel="noopener">🗓 <span>萬年曆時辰方位</span></a></li>
+    <li><a href="https://sch-jade.vercel.app/" target="_blank" rel="noopener">📅 <span>喪禮流程吉課</span></a></li>
+    <li><a href="https://age1-steel.vercel.app/" target="_blank" rel="noopener">🐭 <span>生肖虛歲查詢</span></a></li>
+  </ul>
+</nav>
 </body>
 </html>
