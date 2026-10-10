@@ -181,6 +181,27 @@ input[type=text], textarea, select { border-width: 1px; border-radius: 3px; }
 </style>
 </head>
 <body>
+<!-- 從「重生禮儀 系統工具」首頁進來（網址帶 from=liyi）才顯示「← 系統首頁」；客人直接開啟不顯示 -->
+<style>
+body:has(>.liyi-back){flex-wrap:wrap;align-content:flex-start}
+.liyi-back{flex:0 0 100%;box-sizing:border-box;display:flex;align-items:center;min-height:48px;padding:0 16px;
+  font-family:"Noto Sans TC","PingFang TC",sans-serif;font-size:16px;letter-spacing:1px;color:var(--muted,#6b645e);text-decoration:none}
+.liyi-back:active{opacity:.6}
+@media print{.liyi-back{display:none}}
+</style>
+<script>
+(function(){
+  var K='liyi.fromSystem', on=false;
+  try{
+    if(new URLSearchParams(location.search).get('from')==='liyi') sessionStorage.setItem(K,'1');
+    on=sessionStorage.getItem(K)==='1';
+  }catch(e){ on=/[?&]from=liyi(&|$)/.test(location.search); }
+  if(!on) return;
+  var a=document.createElement('a');
+  a.className='liyi-back'; a.href='https://liyi-system.vercel.app/'; a.textContent='← 系統首頁';
+  document.body.insertBefore(a,document.body.firstChild);
+})();
+</script>
 <main>
   <header class="top">
     <button id="back" class="back" hidden aria-label="返回墓位清單">‹ 返回</button>
