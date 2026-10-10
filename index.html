@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-title" content="尋墓雷達">
 <meta name="theme-color" content="#f6efe2">
 <title>尋墓雷達｜重生禮儀</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@400;500;600;700;900&display=swap">
 <style>
 :root{
   --paper:#f6efe2; --card:#fffaf0; --ink:#3b2a1d; --muted:#6d5a48; --line:#dccfb8;
@@ -141,13 +143,49 @@ body.radar-active::before{
   99%{opacity:.8}
 }
 @media (prefers-reduced-motion:reduce){body.radar-active::before{animation:none;opacity:.9}}
+/* ===== 重生禮儀 和風配色（與「系統工具」一致；獨立網站無法引用系統的 shared/theme.css，所以複製一份在這裡） =====
+ * 臙脂 --enji 主要按鈕與重點字；柿橘 --kaki 已選取、標記、輔助線；墨 --sumi 文字；和紙 --washi 底色 */
+:root {
+  --washi: #f7f4ef; --paper: #ffffff; --paper-2: #faf8f4;
+  --line: #d9d2c7; --line-2: #e9e4dc; --line-strong: #c9c0b3;
+  --sumi: #2a2623; --nezumi: #6b645e;
+  --kaki: #a5512c; --kaki-soft: #f6ece5;
+  --enji: #7e2f26; --enji-soft: #f6e9e6;
+  --ok: #4a6741; --ok-soft: #ebf0e5; --warn: #875a17; --warn-soft: #f6eddb;
+  --serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --sans: "Noto Sans TC", "PingFang TC", "Heiti TC", sans-serif;
+}
+.lt-row { display: flex; align-items: center; gap: 12px; }
+.lt-mark { flex: none; width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid var(--kaki); color: var(--kaki); font-family: var(--serif); font-weight: 900; font-size: 22px; line-height: 1; }
+.lt-brand { margin: 0 0 4px; font-family: var(--serif); font-size: 12px; letter-spacing: 6px; color: var(--kaki); line-height: 1; }
+.lt-title { margin: 0; font-family: var(--serif); font-size: 21px; font-weight: 600; letter-spacing: 3px; color: var(--sumi); line-height: 1.25; }
+.lt-ico { width: 1.15em; height: 1.15em; flex: none; vertical-align: -0.2em; margin-right: 6px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: square; stroke-linejoin: miter; }
+
+/* ── 本頁和風樣式（只改外觀；尋墓雷達的液晶螢幕維持原樣，戶外好辨識） ── */
+:root { --paper: #f7f4ef; --card: #ffffff; --ink: #2a2623; --muted: #6b645e; --line: #d9d2c7; --clay: #7e2f26; --clay-d: #6a271f; --gold: #a5512c; --font: "Noto Sans TC", "PingFang TC", "Heiti TC", system-ui, -apple-system, sans-serif; }
+.top .lt-mark { width: 40px; height: 40px; font-size: 21px; }
+.top .gr-title { display: flex; flex-direction: column; }
+.top .lt-brand { margin-bottom: 4px; }
+h1 { font-family: var(--serif); font-weight: 600; font-size: 24px; letter-spacing: .14em; }
+h2, h3 { font-family: var(--serif); font-weight: 600; }
+.back { font-family: var(--sans); color: var(--nezumi); }
+.btn { border-radius: 3px; border-width: 1px; }
+.btn.primary { font-family: var(--serif); font-weight: 900; letter-spacing: 2px; }
+input[type=text], textarea, select { border-width: 1px; border-radius: 3px; }
+.empty { border-width: 1px; border-radius: 4px; }
+.grp-btn { font-family: var(--serif); border-bottom-width: 1px; }
+.rowlist, .fixbox { border-radius: 4px; }
+.rowitem .rname { font-family: var(--serif); }
+.thumb, .photos img, .photos video { border-radius: 3px; }
+#toast { border-radius: 4px; }
 </style>
 </head>
 <body>
 <main>
   <header class="top">
     <button id="back" class="back" hidden aria-label="返回墓位清單">‹ 返回</button>
-    <h1>尋墓雷達</h1>
+    <span class="lt-mark" aria-hidden="true">墓</span>
+    <div class="gr-title"><p class="lt-brand">重 生 禮 儀</p><h1>尋墓雷達</h1></div>
   </header>
 
   <!-- 清單 -->
