@@ -729,7 +729,8 @@ function updateSave(){
   $('saveHint').hidden=ok;
 }
 $('f-name').addEventListener('input',updateSave);
-$('newBtn').onclick=openRecord;
+// 不能直接寫 onclick=openRecord：點擊事件會被當成「要編輯的那筆」，標題變成「編輯墓位資料」、欄位沒清空、家屬連結的姓名也不會帶入
+$('newBtn').onclick=function(){openRecord();};
 $('cancelBtn').onclick=function(){
   var back=editId;
   revokeDraftUrls();
